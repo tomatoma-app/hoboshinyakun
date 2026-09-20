@@ -13,7 +13,7 @@ const ready=(async()=>{
   // Download the unchanged engine while the Python runtime initializes.
   // Capture errors immediately so a failed request cannot become an unhandled rejection.
   const engineDownload=(async()=>{
-    const response=await fetch('./engine.zip?v=20260920-savefix1');
+    const response=await fetch('./engine.zip?v=20260920-gapfix1');
     if(!response.ok)throw new Error('検索エンジンを取得できませんでした。');
     return {archive:await response.arrayBuffer()};
   })().catch(error=>({error}));
@@ -43,3 +43,5 @@ onmessage=async({data})=>{
     }else postMessage({id,data:answer});
   }catch(error){postMessage({id,error:readableError(error)});}
 };
+
+
