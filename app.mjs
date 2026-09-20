@@ -89,7 +89,7 @@ function renderSettings(){
   }
   const box=section('自習対応の条件');checkbox(box,'studySame','同じ学年の先生にお願いする',state.study_settings.same_grade,()=>changeConditions());
   const line=checkbox(box,'studyLimit','先生1人の自習対応数を制限（1週間）',state.study_settings.limit_enabled,()=>changeConditions());const s=select(state.study_settings.max_count,()=>changeConditions(),'自習対応の上限');s.id='studyMax';line.append(s,document.createTextNode('コマまで'));
-  const help=document.createElement('button');help.id='settingsHelp';help.textContent='使い方動画を見る';help.onclick=openHelp;panel.append(help);
+  const help=document.createElement('button');help.id='settingsHelp';help.textContent='使い方（PDF）を開く';help.onclick=openHelp;panel.append(help);
 }
 async function changeConditions(){
   const conditions={...state.conditions};for(const input of document.querySelectorAll('[data-rule]'))if(input.dataset.rule in conditions)conditions[input.dataset.rule]=input.checked;
@@ -189,10 +189,8 @@ document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen(
 
 if(document.fonts)document.fonts.ready.then(()=>requestAnimationFrame(layoutGrid));
 
-function openHelp(){const video=$('helpVideo');if(!video.getAttribute('src'))video.src=video.dataset.src;$('helpDialog').showModal();}
+function openHelp(){window.open('ほぼしんや君_使い方.pdf','_blank','noopener');}
 $('helpButton').onclick=openHelp;
-$('closeHelp').onclick=()=>$('helpDialog').close();
-$('helpDialog').addEventListener('close',()=>$('helpVideo').pause());
 
 $('fullscreenYes').onclick=()=>{$('fullscreenPrompt').close();if(!document.fullscreenElement)void toggleFullscreen();};
 $('fullscreenNo').onclick=()=>$('fullscreenPrompt').close();
