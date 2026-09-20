@@ -61,3 +61,23 @@ body:not(.loaded) #welcome .welcomeActions{margin:0}
 
 body:not(.loaded) #startupPanel{margin:0 auto 16px}
 
+
+/* Preserve the original desk texture; the live title plaque precisely covers the artwork's guide plaque. */
+body:not(.loaded) #welcome{transform:translateY(-66px)}
+body:not(.loaded) .startupTitleCard{width:min(100%,740px);height:190px;margin-bottom:22px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border-color:#c0a3f2;border-radius:28px;box-shadow:none;backdrop-filter:none}
+body:not(.loaded) #welcome .appTitle{margin:0 0 8px}
+@media(max-width:700px){body:not(.loaded) #welcome{transform:none}body:not(.loaded) .startupTitleCard{height:auto;min-height:145px;padding:24px 18px}}
+
+
+/* Use the original high-resolution artwork directly. The live controls sit on its matching panels. */
+body:not(.loaded)::before{background:url('assets/startup-room.png') center/cover no-repeat;filter:none}
+body:not(.loaded)::after{display:none}
+body:not(.loaded) #welcome{position:absolute;inset:0;width:100%;margin:0;padding:0;transform:none;background:transparent;border:0;box-shadow:none}
+body:not(.loaded) .startupTitleCard{position:absolute;left:50%;top:30.3%;width:44.3%;height:20.2%;margin:0;padding:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+body:not(.loaded) #welcome .appTitle{margin:0 0 8px}body:not(.loaded) #welcome h1{margin:0}
+body:not(.loaded) #startupPanel{position:absolute;left:50%;top:20.5%;width:min(580px,72vw);margin:0;transform:translateX(-50%);box-shadow:0 8px 20px rgba(62,45,99,.12)}
+body:not(.loaded) #welcome .welcomeActions{position:absolute;left:50%;top:53.4%;width:34.2%;margin:0;transform:translateX(-50%);display:flex;justify-content:space-between;gap:0}
+body:not(.loaded) #welcome .welcomeActions button{width:47%;min-width:0;height:8.9vh;min-height:54px;margin:0;padding:0 8px;background:transparent!important;border:0;box-shadow:none;font-weight:800}
+body:not(.loaded) #welcome .welcomeActions .primary{color:#fff}body:not(.loaded) #welcome .welcomeActions #helpButton{color:#355d4b}
+@media(max-width:700px){body:not(.loaded) #welcome{position:relative;inset:auto;transform:none;padding:14px 0}body:not(.loaded) .startupTitleCard{position:relative;left:auto;top:auto;width:min(100%,740px);height:auto;min-height:145px;transform:none;background:rgba(255,255,255,.9);border:1px solid #c0a3f2;padding:24px 18px}body:not(.loaded) #startupPanel{position:relative;left:auto;top:auto;width:min(100%,580px);transform:none;margin:0 auto 16px}body:not(.loaded) #welcome .welcomeActions{position:relative;left:auto;top:auto;width:100%;transform:none;margin-top:16px;justify-content:center;gap:14px}body:not(.loaded) #welcome .welcomeActions button{width:auto;min-width:160px;background:#e8e1fc!important;padding:14px 20px}body:not(.loaded) #welcome .welcomeActions .primary{background:#7d67d8!important}}
+
