@@ -13,7 +13,7 @@ const ready=(async()=>{
   // Download the unchanged engine while the Python runtime initializes.
   // Capture errors immediately so a failed request cannot become an unhandled rejection.
   const engineDownload=(async()=>{
-    const response=await fetch('./engine.zip?v=20260921-cycleheaders1');
+    const response=await fetch('./engine.zip?v=20260921-redimport1');
     if(!response.ok)throw new Error('検索エンジンを取得できませんでした。');
     return {archive:await response.arrayBuffer()};
   })().catch(error=>({error}));
