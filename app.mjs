@@ -11,11 +11,11 @@ function startupTick(){
 function beginStartup(){
   clearInterval(startupTimer);startupStarted=performance.now();startupPrevious=null;startupRecord=!state;
   try{const value=Number(localStorage.getItem(startupStorageKey));if(Number.isFinite(value)&&value>0&&value<3600)startupPrevious=value;}catch{}
-  $('startupPanel').dataset.state='loading';$('startupProgress').value=0;$('startupSteps').textContent='0 / 4段階完了';$('startupStage').textContent='実行部品を読み込んでいます';$('startupEstimate').textContent='初回のため所要時間を計測しています';startupTick();startupTimer=setInterval(startupTick,250);
+  $('startupPanel').hidden=false;$('startupPanel').dataset.state='loading';$('startupProgress').value=0;$('startupSteps').textContent='0 / 4段階完了';$('startupStage').textContent='実行部品を読み込んでいます';$('startupEstimate').textContent='初回のため所要時間を計測しています';startupTick();startupTimer=setInterval(startupTick,250);
 }
 function finishStartup(success){
   clearInterval(startupTimer);startupTick();const seconds=(performance.now()-startupStarted)/1000;$('startupPanel').dataset.state=success?'ready':'error';
-  if(success){$('startupProgress').value=4;$('startupSteps').textContent='4 / 4段階完了';$('startupStage').textContent='準備できました';$('startupElapsed').textContent=seconds.toFixed(1)+'秒で起動しました';$('startupEstimate').textContent='Excelを選んで始められます';if(startupRecord)try{localStorage.setItem(startupStorageKey,String(seconds));}catch{}}
+  if(success){$('startupPanel').hidden=true;$('startupProgress').value=4;$('startupSteps').textContent='4 / 4段階完了';$('startupStage').textContent='準備できました';$('startupElapsed').textContent=seconds.toFixed(1)+'秒で起動しました';$('startupEstimate').textContent='Excelを選んで始められます';if(startupRecord)try{localStorage.setItem(startupStorageKey,String(seconds));}catch{}}
   else{$('startupStage').textContent='読み込みが止まりました';$('startupEstimate').textContent='通信環境を確認して再読み込みしてください';}
 }
 function startWorker(){
@@ -89,6 +89,7 @@ function renderSettings(){
   }
   const box=section('自習対応の条件');checkbox(box,'studySame','同じ学年の先生にお願いする',state.study_settings.same_grade,()=>changeConditions());
   const line=checkbox(box,'studyLimit','先生1人の自習対応数を制限（1週間）',state.study_settings.limit_enabled,()=>changeConditions());const s=select(state.study_settings.max_count,()=>changeConditions(),'自習対応の上限');s.id='studyMax';line.append(s,document.createTextNode('コマまで'));
+  const help=document.createElement('button');help.id='settingsHelp';help.textContent='使い方動画を見る';help.onclick=openHelp;panel.append(help);
 }
 async function changeConditions(){
   const conditions={...state.conditions};for(const input of document.querySelectorAll('[data-rule]'))if(input.dataset.rule in conditions)conditions[input.dataset.rule]=input.checked;
@@ -113,7 +114,8 @@ async function cancelSearch(){
   if(!busy)return;recovering=true;worker.terminate();for(const job of pending.values())job.reject(new Error('cancelled'));pending.clear();clearInterval(timer);$('progressDialog').close();startWorker();await workerReady;await rpc('restore',{snapshot,undo_token:undoToken},originalBytes);recovering=false;setBusy(false);status('中止しました。検索前の時間割と条件を保持しています。');
 }
 $('openBottom').onclick=$('open2').onclick=()=>$('file').click();
-$('file').onchange=async()=>{const file=$('file').files[0];if(!file)return;if(dirty&&!await message('Excelを読み込む','未保存の変更を破棄して別のExcelを読み込みますか？',true))return;await run(async()=>{const bytes=await file.arrayBuffer();const {data}=await rpc('load',{name:file.name},bytes);originalBytes=bytes;fileName=file.name;selected.clear();update(data);dirty=false;switchTab('edit');status(`${state.teachers.length}人の時間割を読み込みました。`);});$('file').value='';};
+let fullscreenPromptShown=false;
+$('file').onchange=async()=>{const file=$('file').files[0];if(!file)return;if(dirty&&!await message('Excelを読み込む','未保存の変更を破棄して別のExcelを読み込みますか？',true))return;await run(async()=>{const bytes=await file.arrayBuffer();const {data}=await rpc('load',{name:file.name},bytes);originalBytes=bytes;fileName=file.name;selected.clear();update(data);dirty=false;switchTab('edit');status(`${state.teachers.length}人の時間割を読み込みました。`);if(!fullscreenPromptShown){fullscreenPromptShown=true;if(!document.fullscreenElement)$('fullscreenPrompt').showModal();}});$('file').value='';};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>edit(b.dataset.action));
 $('undo').onclick=()=>run(async()=>{update((await rpc('undo')).data);dirty=true;status('1つ前に戻しました。');});
 $('search').onclick=()=>run(async()=>{const {data}=await rpc('preflight');if(data.errors.length){await message('授業数が一致しません','原本と比べて授業数に不足または過多があります。\n\n'+data.errors.join('\n'));return;}if(!data.pending){await message('条件登録','現在の条件で移動が必要な授業はありません。直接入力した変更は「保存」で残せます。');return;}$('timeDialog').showModal();});$('closeTime').onclick=()=>$('timeDialog').close();document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>search(b.dataset.mode));
@@ -186,3 +188,11 @@ for(const button of document.querySelectorAll('[data-fullscreen]'))button.onclic
 document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen();
 
 if(document.fonts)document.fonts.ready.then(()=>requestAnimationFrame(layoutGrid));
+
+function openHelp(){const video=$('helpVideo');if(!video.getAttribute('src'))video.src=video.dataset.src;$('helpDialog').showModal();}
+$('helpButton').onclick=openHelp;
+$('closeHelp').onclick=()=>$('helpDialog').close();
+$('helpDialog').addEventListener('close',()=>$('helpVideo').pause());
+
+$('fullscreenYes').onclick=()=>{$('fullscreenPrompt').close();if(!document.fullscreenElement)void toggleFullscreen();};
+$('fullscreenNo').onclick=()=>$('fullscreenPrompt').close();
