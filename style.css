@@ -6,3 +6,5 @@
 
 @media(max-width:1100px){.tabletop{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}#candidateBar{grid-column:2;grid-row:1}.legend{grid-column:3}#resultControls{font-size:10px}}
 #grid tr:nth-child(even) td.selected{background:#f7f4ff!important}#grid tr:nth-child(odd) td.selected{background:white!important}#grid tr td.changed.selected{background:#fff2a8!important}
+
+#startupPanel{margin:20px auto 0;padding:14px 16px;background:#f5f2ff;border:1px solid #d8d0ee;border-radius:6px;max-width:580px;text-align:left}.startupHeading,.startupTimes{display:flex;justify-content:space-between;align-items:center;gap:16px}.startupHeading{font-size:13px}#startupSteps{font-size:11px;white-space:nowrap;color:#766d8d}#startupProgress{display:block;width:100%;margin:12px 0;height:14px;accent-color:#7661d5}.startupTimes{font-size:12px;color:#675c7a;flex-wrap:wrap}#startupEstimate{font-size:11px}#startupPanel[data-state=ready]{background:#e7f5f0;border-color:#b4d5c7}#startupPanel[data-state=error]{border-color:#d64760}#startupPanel[data-state=error] strong{color:#a13232}

@@ -2,16 +2,34 @@ const $=id=>document.getElementById(id);
 let worker,config,state,snapshot,originalBytes,fileName,readyResolve,workerReady,pending=new Map(),sequence=0,activeTab='edit',selected=new Set(),anchor=null,candidate=-1,candidateList=[],busy=false,recovering=false,timer=null,dirty=false,displayView=null,fitMode=true,zoom=1,dragState=null,selectionEpoch=0,viewWidth=1,undoToken=null;
 const key=(t,s)=>`${t}:${s}`,pairs=set=>[...set].map(v=>{const[t,s]=v.split(':');return[t,+s]});
 function status(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error);}
+let startupTimer=null,startupStarted=0,startupPrevious=null,startupRecord=true;
+const startupStorageKey='hoboshinyakun.startupSeconds.py314';
+function startupTick(){
+  const elapsed=(performance.now()-startupStarted)/1000;$('startupElapsed').textContent='経過 '+Math.floor(elapsed)+'秒';
+  if(startupPrevious!==null){const left=Math.ceil(startupPrevious-elapsed);$('startupEstimate').textContent=left>0?'目安：残り約'+left+'秒（前回 '+Math.ceil(startupPrevious)+'秒）':'前回より時間がかかっています。準備を続けています';}
+}
+function beginStartup(){
+  clearInterval(startupTimer);startupStarted=performance.now();startupPrevious=null;startupRecord=!state;
+  try{const value=Number(localStorage.getItem(startupStorageKey));if(Number.isFinite(value)&&value>0&&value<3600)startupPrevious=value;}catch{}
+  $('startupPanel').dataset.state='loading';$('startupProgress').value=0;$('startupSteps').textContent='0 / 4段階完了';$('startupStage').textContent='実行部品を読み込んでいます';$('startupEstimate').textContent='初回のため所要時間を計測しています';startupTick();startupTimer=setInterval(startupTick,250);
+}
+function finishStartup(success){
+  clearInterval(startupTimer);startupTick();const seconds=(performance.now()-startupStarted)/1000;$('startupPanel').dataset.state=success?'ready':'error';
+  if(success){$('startupProgress').value=4;$('startupSteps').textContent='4 / 4段階完了';$('startupStage').textContent='準備できました';$('startupElapsed').textContent=seconds.toFixed(1)+'秒で起動しました';$('startupEstimate').textContent='Excelを選んで始められます';if(startupRecord)try{localStorage.setItem(startupStorageKey,String(seconds));}catch{}}
+  else{$('startupStage').textContent='読み込みが止まりました';$('startupEstimate').textContent='通信環境を確認して再読み込みしてください';}
+}
 function startWorker(){
-  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260920-ui2',{type:'module'});
+  beginStartup();
+  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260920-startup1',{type:'module'});
   worker.onmessage=({data:m})=>{
+    if(m.type==='startup'){$('startupProgress').value=m.completed;$('startupSteps').textContent=m.completed+' / 4段階完了';$('startupStage').textContent=m.text;status(m.text+'…');return;}
     if(m.type==='status'){status(m.text);return;}
-    if(m.type==='ready'){config=m.data;readyResolve();$('runtime').textContent='ブラウザー内で実行';$('open').disabled=$('open2').disabled=busy;status('準備できました。Excelを読み込んでください。');return;}
+    if(m.type==='ready'){finishStartup(true);config=m.data;readyResolve();$('runtime').textContent='ブラウザー内で実行';$('open').disabled=$('open2').disabled=busy;status('準備できました。Excelを読み込んでください。');return;}
     if(m.type==='progress'){if(m.data.solutions!==undefined)$('solutions').textContent=m.data.solutions;return;}
-    if(m.type==='fatal'){status('起動できませんでした。通信環境を確認してページを再読み込みしてください。\n'+m.error,true);return;}
+    if(m.type==='fatal'){finishStartup(false);status('起動できませんでした。通信環境を確認してページを再読み込みしてください。\n'+m.error,true);return;}
     const job=pending.get(m.id);if(!job)return;pending.delete(m.id);m.error?job.reject(new Error(m.error)):job.resolve(m);
   };
-  worker.onerror=e=>status('実行部品を読み込めませんでした。ページを再読み込みしてください。'+e.message,true);
+  worker.onerror=e=>{finishStartup(false);status('実行部品を読み込めませんでした。ページを再読み込みしてください。'+e.message,true);};
 }
 async function rpc(command,args={},bytes){await workerReady;const id=++sequence;return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});worker.postMessage({id,command,args,bytes});});}
 function setBusy(on){busy=on;$('workspace').inert=on;$('toolbar').inert=on;document.body.classList.toggle('busy',on);$('open').disabled=on||!config;$('save').disabled=on||!state;}
