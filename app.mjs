@@ -36,7 +36,7 @@ function setBusy(on){busy=on;$('workspace').inert=on;$('toolbar').inert=on;docum
 async function run(fn){if(busy)return;setBusy(true);try{await fn();}catch(e){status(e.message,true);}finally{setBusy(false);}}
 function update(data){if(data.undo_token)undoToken=data.undo_token;if(data.snapshot){snapshot=data.snapshot;candidateList=[];candidate=-1;$('count').textContent='0';$('candidates').replaceChildren();$('candidates').disabled=$('candidateList').disabled=$('apply').disabled=true;$('candidateSummary').textContent='';}if(data.view){state=data.view;displayView=state;render();}}
 function render(view=displayView||state){
-  if(!view)return;displayView=view;$('welcome').hidden=true;$('workspace').hidden=false;document.body.classList.add('loaded');$('save').disabled=busy;$('filename').textContent=view.title||fileName;
+  if(!view)return;displayView=view;$('welcome').hidden=true;$('workspace').hidden=false;document.body.classList.add('loaded');if($('status').parentElement!==$('information'))$('information').append($('status'));$('save').disabled=busy;$('filename').textContent=view.title||fileName;
   const original=activeTab==='result'&&$('originalView').checked,onlyChanged=activeTab==='result'&&$('onlyChanged').checked;
   const marked=field=>new Set(view[field].map(([t,s])=>key(t,s))),absent=marked('absent'),fixed=marked('fixed'),changed=marked('changed'),study=marked('study'),violations=marked('violations');
   const changedTeachers=new Set(view.changed.map(([t])=>t));const teachers=view.teachers.filter(t=>!onlyChanged||changedTeachers.has(t.id));
@@ -51,7 +51,7 @@ function render(view=displayView||state){
 function layoutGrid(){
   const wrap=$('tableWrap'),table=$('grid');if(!state||wrap.clientHeight<1)return;wrap.style.overflow=fitMode?'hidden':'auto';
   const rows=table.tBodies[0]?.rows.length||1,width=wrap.clientWidth,height=wrap.clientHeight,header=28;
-  let cw,ch;if(fitMode){ch=Math.max(1,Math.min(144,Math.floor((height-header-2)/rows)));cw=Math.max(1,(width-101)/29);zoom=ch/48;viewWidth=cw/(112*zoom);wrap.scrollTop=wrap.scrollLeft=0;}else{ch=48*zoom;cw=112*zoom*viewWidth;}
+  let cw,ch;if(fitMode){ch=Math.max(1,Math.min(144,(height-header-2)/rows));cw=Math.max(1,(width-101)/29);zoom=ch/48;viewWidth=cw/(112*zoom);wrap.scrollTop=wrap.scrollLeft=0;}else{ch=48*zoom;cw=112*zoom*viewWidth;}
   table.style.width=(100+29*cw)+'px';table.style.setProperty('--row-height',ch+'px');table.style.setProperty('--cell-font',Math.max(5,Math.min(16,ch*.68,cw/4.3))+'px');table.style.setProperty('--name-font',Math.max(5,Math.min(16,ch*.7))+'px');table.classList.toggle('twoLines',!fitMode&&ch>=34);$('zoomLabel').textContent=Math.round(zoom*100)+'%';
   table.querySelectorAll('td>span').forEach(span=>{span.style.transform='';span.textContent=!fitMode&&ch>=34?span.dataset.label.replace(' ','\n'):span.dataset.label.replace(' ','');const available=cw-4;if(span.scrollWidth>available)span.style.transform=`scaleX(${Math.max(.15,available/span.scrollWidth)})`;});
 }
@@ -90,7 +90,7 @@ async function changeConditions(){
   if(conditions.allow_unavailable_edit&&!state.conditions.allow_unavailable_edit&&!await message('勤務不可の編集','勤務不可の斜線を削除したり、授業を入れ替えたりできるようになります。許可しますか？',true)){renderSettings();return;}
   await run(async()=>{const {data}=await rpc('conditions',{conditions,room_limits,study_settings});update(data);dirty=true;status('条件を変更しました。');});
 }
-function switchTab(name){activeTab=name;hideMenu();document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===name));$('settings').hidden=name!=='settings';$('gridPanel').hidden=name==='settings';$('candidateBar').hidden=name!=='result';$('resultControls').hidden=name!=='result';$('editInfo').hidden=name==='result';$('toolbar').hidden=false;document.querySelector('.viewtools').hidden=name==='settings';selected.clear();$('selectionInfo').textContent='';if(name==='result'&&candidateList.length){preview();}else{displayView=state;if(state)render();}}
+function switchTab(name){activeTab=name;hideMenu();document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===name));$('settings').hidden=name!=='settings';$('gridPanel').hidden=name==='settings';$('candidateBar').hidden=name!=='result';$('resultControls').hidden=name!=='result';$('resultTop').hidden=name!=='result';$('editInfo').hidden=name==='result';$('toolbar').hidden=false;document.querySelector('.viewtools').hidden=name==='settings';selected.clear();$('selectionInfo').textContent='';if(name==='result'&&candidateList.length){preview();}else{displayView=state;if(state)render();}}
 function message(title,text,confirm=false){$('messageTitle').textContent=title;$('messageText').textContent=text;$('messageCancel').hidden=!confirm;$('messageDialog').showModal();return new Promise(resolve=>{const close=v=>{$('messageDialog').close();resolve(v);};$('messageOK').onclick=()=>close(true);$('messageCancel').onclick=()=>close(false);$('messageDialog').oncancel=()=>resolve(false);});}
 async function edit(action){hideMenu();if(action==='lesson'){openLesson();return;}if(!selected.size){status('変更するコマを選んでください。');return;}await run(async()=>{const args={action,cells:pairs(selected)};let {data}=await rpc('edit',args);if(data.confirm){if(!await message('合同授業の変更',data.confirm,true))return;({data}=await rpc('edit',{...args,confirmed:true}));}update(data);dirty=true;status('条件を変更しました。');});}
 async function preview(){candidate=+$('candidates').value;await run(async()=>{const {data}=await rpc('preview',{index:candidate});displayView=data.view;render(data.view);const c=candidateList[candidate];$('candidateSummary').textContent=`変更 ${c.changed}コマ ／ 関わる先生 ${c.teachers}人`;});}
@@ -162,3 +162,18 @@ for(const id of ['afterView','originalView','onlyChanged'])$(id).onchange=()=>{s
 function openLesson(){if(!selected.size)return;$('lessonSummary').textContent=selected.size+'コマに設定します。';for(const [id,values] of [['classOptions',state.classes],['subjectOptions',state.subjects]])$(id).replaceChildren(...values.map(v=>new Option(v,v)));$('lessonClass').value='';$('lessonSubject').value='';$('lessonError').textContent='';$('lessonDialog').showModal();}
 $('lessonCancel').onclick=()=>$('lessonDialog').close();$('lessonApply').onclick=()=>run(async()=>{try{const {data}=await rpc('edit',{action:'lesson',cells:pairs(selected),classes:$('lessonClass').value.trim(),subject:$('lessonSubject').value.trim()});update(data);dirty=true;$('lessonDialog').close();status('クラス・教科を設定しました。');}catch(e){$('lessonError').textContent=e.message;}});
 $('candidateList').onclick=()=>{const rows=$('candidateRows');rows.replaceChildren(...candidateList.map((c,i)=>{const b=document.createElement('button');b.textContent=`案${i+1}　変更${c.changed}コマ・先生${c.teachers}人`;b.onclick=async()=>{$('candidates').value=i;await preview();const lines=[];for(const t of displayView.teachers)for(let s=0;s<29;s++)if(displayView.changed.some(([id,slot])=>id===t.id&&slot===s))lines.push(`${t.name} ${config.slots[s]}　${t.original[s]||'空き'} → ${t.cells[s]||'空き'}`);$('candidateChanges').textContent=lines.join('\n');};return b;}));$('candidateChanges').textContent='候補を選ぶと変更内容を表示します。';$('candidateDialog').showModal();};$('closeCandidates').onclick=()=>$('candidateDialog').close();
+
+async function toggleFullscreen(){
+  try{
+    if(document.fullscreenElement)await document.exitFullscreen();
+    else if(document.fullscreenEnabled&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen({navigationUI:'hide'});
+    else{status('全画面表示は、このブラウザーでは利用できません。Edge・ChromeではF11キーも使えます。');return;}
+  }catch{status('全画面に切り替えられませんでした。Edge・ChromeではF11キーをお試しください。');}
+}
+function updateFullscreen(){
+  const active=!!document.fullscreenElement;
+  for(const button of document.querySelectorAll('[data-fullscreen]')){button.textContent=active?'全画面を解除':'全画面表示';button.setAttribute('aria-pressed',String(active));button.title=active?'全画面表示を解除（Escでも戻れます）':'ブラウザーのタブやアドレス欄を隠して広く表示';}
+  requestAnimationFrame(layoutGrid);
+}
+for(const button of document.querySelectorAll('[data-fullscreen]'))button.onclick=toggleFullscreen;
+document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen();
