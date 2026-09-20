@@ -20,7 +20,7 @@ function finishStartup(success){
 }
 function startWorker(){
   beginStartup();
-  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260920-gapfix2',{type:'module'});
+  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260920-studytransfer1',{type:'module'});
   worker.onmessage=({data:m})=>{
     if(m.type==='startup'){$('startupProgress').value=m.completed;$('startupSteps').textContent=m.completed+' / 4段階完了';$('startupStage').textContent=m.text;status(m.text+'…');return;}
     if(m.type==='status'){status(m.text);return;}
