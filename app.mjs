@@ -20,7 +20,7 @@ function finishStartup(success){
 }
 function startWorker(){
   beginStartup();
-  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260921-redimport1',{type:'module'});
+  workerReady=new Promise(r=>readyResolve=r);worker=new Worker('./worker.mjs?v=20260921-moral1',{type:'module'});
   worker.onmessage=({data:m})=>{
     if(m.type==='startup'){$('startupProgress').value=m.completed;$('startupSteps').textContent=m.completed+' / 4段階完了';$('startupStage').textContent=m.text;status(m.text+'…');return;}
     if(m.type==='status'){status(m.text);return;}
@@ -78,7 +78,7 @@ function chooseRange(first,last,base=new Set()){
 }
 function renderSettings(){
   const panel=$('settings');panel.replaceChildren();const title=document.createElement('h2');title.textContent='時間割変更の条件';panel.append(title);
-  const defaultsOff=new Set(['same_day_only','movement_same_grade','allow_unavailable_edit','support_fixed','initial_training_fixed','foreign_fixed']);
+  const defaultsOff=new Set(['same_day_only','movement_same_grade','allow_unavailable_edit','support_fixed','initial_training_fixed','foreign_fixed','moral_2_fixed','moral_3_fixed']);
   const limits={science_limit:[['science','上限']],music_limit:[['music','上限']],art_limit:[['art','上限']],pe_limit:[['pe1','1年'],['pe2','2年'],['pe3','3年']]};
   function section(title){const h=document.createElement('h3');h.textContent=title;panel.append(h);const box=document.createElement('div');box.className='checkgroup';panel.append(box);return box;}
   function select(value,onchange,label){const s=document.createElement('select');s.setAttribute('aria-label',label);for(let i=1;i<=5;i++){const o=new Option(i,i);s.add(o);}s.value=value;s.onchange=onchange;return s;}
