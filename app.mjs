@@ -53,7 +53,14 @@ function layoutGrid(){
   const rows=table.tBodies[0]?.rows.length||1,width=wrap.clientWidth,height=wrap.clientHeight,header=28;
   let cw,ch;if(fitMode){ch=Math.max(1,Math.min(144,Math.floor((height-header-6)/rows*64)/64));cw=Math.max(1,(width-104)/29);zoom=ch/48;viewWidth=cw/(112*zoom);wrap.scrollTop=wrap.scrollLeft=0;}else{ch=48*zoom;cw=112*zoom*viewWidth;}
   table.style.width=(100+29*cw)+'px';table.style.setProperty('--row-height',ch+'px');table.style.setProperty('--cell-font',Math.max(5,Math.min(16,ch*.68,cw/4.3))+'px');table.style.setProperty('--name-font',Math.max(5,Math.min(16,ch*.7))+'px');table.classList.toggle('twoLines',!fitMode&&ch>=34);$('zoomLabel').textContent=Math.round(zoom*100)+'%';
-  table.querySelectorAll('td>span').forEach(span=>{span.style.transform='';span.textContent=!fitMode&&ch>=34?span.dataset.label.replace(' ','\n'):span.dataset.label.replace(' ','');const available=cw-4;if(span.scrollWidth>available)span.style.transform=`scaleX(${Math.max(.15,available/span.scrollWidth)})`;});
+  table.querySelectorAll('td>span').forEach(span=>{
+    span.style.transform='translate(-50%,-50%)';
+    span.textContent=!fitMode&&ch>=34?span.dataset.label.replace(' ','\n'):span.dataset.label.replace(' ','');
+    const cell=span.parentElement,rect=span.getBoundingClientRect();
+    const sx=Math.min(1,Math.max(1,cell.clientWidth-6)/Math.max(1,rect.width));
+    const sy=Math.min(1,Math.max(1,cell.clientHeight-4)/Math.max(1,rect.height));
+    span.style.transform=`translate(-50%,-50%) scale(${sx},${sy})`;
+  });
 }
 function paintSelection(){document.querySelectorAll('#grid td').forEach(c=>c.classList.toggle('selected',selected.has(c.dataset.key)));}
 async function describeSelection(cell){
@@ -177,3 +184,5 @@ function updateFullscreen(){
 }
 for(const button of document.querySelectorAll('[data-fullscreen]'))button.onclick=toggleFullscreen;
 document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen();
+
+if(document.fonts)document.fonts.ready.then(()=>requestAnimationFrame(layoutGrid));

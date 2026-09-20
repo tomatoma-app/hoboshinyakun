@@ -23,3 +23,6 @@ html:fullscreen body{padding:2px;box-sizing:border-box;width:100%;height:100dvh}
 /* All timetable controls share one top row. Narrow windows can scroll this row. */
 .topbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:5px;scrollbar-width:thin}.topbar #resultControls{flex-shrink:0;font-size:10px;gap:3px}.topbar #candidateBar{flex-shrink:0;margin:0 auto;gap:3px;font-size:10px}.topbar #candidates{width:135px;font-size:10px}.topbar #candidateBar button{padding:4px 6px;font-size:10px}.topbar .legend{flex-shrink:0}.topbar #resultControls label{gap:0}.topbar #resultControls input{margin:3px}.topbar nav button{padding:5px 9px;font-size:12px}
 @media(max-width:1150px){.topbar{gap:3px}.topbar nav button{padding:5px 6px;font-size:11px}.topbar #candidates{width:116px}.topbar .legend{font-size:9px;gap:1px}.topbar .legend span{padding:2px}.topbar [data-fullscreen]{font-size:10px;padding:5px 3px}}
+
+/* Center the actual text box before fitting long class/subject labels. */
+#grid td>span{position:absolute;left:50%;top:50%;display:block;width:max-content;max-width:none;margin:0;transform:translate(-50%,-50%);transform-origin:center center;line-height:1.15;pointer-events:none}
