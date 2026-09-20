@@ -46,3 +46,18 @@ body:not(.loaded) #welcome .welcomeActions #helpButton{background:#dff2e9;border
 body:not(.loaded) #startupPanel{background:rgba(248,246,255,.92);border-color:#d5c9f2;border-radius:14px}
 @media(max-width:700px){body:not(.loaded) main{padding:14px}body:not(.loaded) #welcome{padding:30px 20px;border-radius:22px}body:not(.loaded) #welcome .welcomeActions button{width:100%;min-width:0}}
 
+
+/* Match the staff-room artwork: one title plaque above the two actions. */
+body:not(.loaded)::before{background:linear-gradient(rgba(250,248,255,.20),rgba(250,248,255,.20)),url('assets/startup-room.png') center/cover no-repeat;filter:saturate(.88) brightness(1.02)}
+body:not(.loaded)::after{display:none}
+body:not(.loaded) #welcome{width:min(100%,760px);padding:24px 0;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+body:not(.loaded) .startupTitleCard{padding:30px 44px;margin:0 auto 22px;width:min(100%,740px);background:rgba(255,255,255,.87);border:1px solid rgba(190,163,242,.88);border-radius:28px;box-shadow:0 12px 30px rgba(62,45,99,.15);backdrop-filter:blur(5px)}
+body:not(.loaded) #welcome h1{margin:0;font-size:clamp(36px,6vw,56px)}
+body:not(.loaded) #welcome .appTitle{margin:0 0 8px}
+body:not(.loaded) #startupPanel{width:min(100%,580px);margin:0 auto 18px;box-shadow:0 8px 20px rgba(62,45,99,.1)}
+body:not(.loaded) #welcome .welcomeActions{margin:0}
+@media(max-width:700px){body:not(.loaded) #welcome{padding:14px 0}body:not(.loaded) .startupTitleCard{padding:24px 18px;margin-bottom:16px;border-radius:22px}}
+
+
+body:not(.loaded) #startupPanel{margin:0 auto 16px}
+
