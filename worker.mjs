@@ -1,4 +1,11 @@
 let py;
+function readableError(error){
+  const detail=String(error),lines=detail.trim().split(/\r?\n/);
+  const expected=lines.findLast(line=>/^(ValueError|FileNotFoundError|PermissionError):/.test(line.trim()));
+  if(expected)return expected.trim().replace(/^[^:]+:\s*/, '');
+  console.error(detail);
+  return '処理中にエラーが発生しました。'+(lines.at(-1)||'').replace(/^PythonError:\s*/, '');
+}
 globalThis.reportProgress = text => postMessage({type:'progress',data:JSON.parse(text)});
 const ready=(async()=>{
   const startup=(completed,text)=>postMessage({type:'startup',completed,text});
@@ -6,7 +13,7 @@ const ready=(async()=>{
   // Download the unchanged engine while the Python runtime initializes.
   // Capture errors immediately so a failed request cannot become an unhandled rejection.
   const engineDownload=(async()=>{
-    const response=await fetch('./engine.zip?v=20260920-ui2');
+    const response=await fetch('./engine.zip?v=20260920-fixrange1');
     if(!response.ok)throw new Error('検索エンジンを取得できませんでした。');
     return {archive:await response.arrayBuffer()};
   })().catch(error=>({error}));
@@ -34,5 +41,5 @@ onmessage=async({data})=>{
     if(command==='export'){
       const file=py.FS.readFile('/data/output.xlsx');postMessage({id,data:answer,file:file.buffer},[file.buffer]);
     }else postMessage({id,data:answer});
-  }catch(error){postMessage({id,error:String(error)});}
+  }catch(error){postMessage({id,error:readableError(error)});}
 };
