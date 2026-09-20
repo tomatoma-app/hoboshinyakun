@@ -30,3 +30,19 @@ html:fullscreen body{padding:2px;box-sizing:border-box;width:100%;height:100dvh}
 body:not(.loaded)>#status:not(.error){display:none}body:not(.loaded) main{padding:24px}#welcome{border:0;box-shadow:none;background:transparent;padding:24px;width:min(100%,640px)}#welcome h1{font-size:clamp(36px,6vw,56px);letter-spacing:.04em;margin:0 0 28px;color:#443568}#welcome .appTitle{margin:0 0 8px;font-size:15px;color:#766d8d}#welcome .welcomeActions{gap:12px}#welcome .welcomeActions button{margin:0;padding:16px 24px;min-height:54px;font-size:16px}#welcome #helpButton{min-width:120px}#welcome #startupPanel{margin:0 0 22px;padding:12px}
 
 #settingsHelp{display:block;margin-top:24px;padding:10px 18px}
+
+/* Startup screen: a soft staff-room backdrop with an always-readable central panel. */
+body:not(.loaded){position:relative;isolation:isolate;background:#f4f0ff}
+body:not(.loaded)::before{content:'';position:fixed;inset:0;z-index:-2;background:linear-gradient(rgba(250,248,255,.72),rgba(250,248,255,.72)),url('assets/startup-room.png') center/cover no-repeat;filter:saturate(.74) brightness(1.08)}
+body:not(.loaded)::after{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at center,rgba(255,255,255,.25),rgba(246,241,255,.42))}
+body:not(.loaded) #welcome{width:min(100%,680px);padding:40px 44px;background:rgba(255,255,255,.88);border:1px solid rgba(190,163,242,.86);border-radius:28px;box-shadow:0 20px 52px rgba(62,45,99,.18);backdrop-filter:blur(7px)}
+body:not(.loaded) #welcome,.welcomeActions button{font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Yu Gothic UI',Meiryo,sans-serif}
+body:not(.loaded) #welcome .appTitle{font-weight:700;letter-spacing:.12em;color:#6c5a9f}
+body:not(.loaded) #welcome h1{font-weight:800;color:#403060;text-shadow:0 1px 0 #fff}
+body:not(.loaded) #welcome .welcomeActions{margin-top:4px;gap:14px}
+body:not(.loaded) #welcome .welcomeActions button{min-width:218px;border-radius:18px;padding:17px 26px;font-weight:700;box-shadow:0 5px 12px rgba(62,45,99,.13)}
+body:not(.loaded) #welcome .welcomeActions .primary{background:#7d67d8;border:1px solid #715bc9}
+body:not(.loaded) #welcome .welcomeActions #helpButton{background:#dff2e9;border:1px solid #9bcdb8;color:#355d4b}
+body:not(.loaded) #startupPanel{background:rgba(248,246,255,.92);border-color:#d5c9f2;border-radius:14px}
+@media(max-width:700px){body:not(.loaded) main{padding:14px}body:not(.loaded) #welcome{padding:30px 20px;border-radius:22px}body:not(.loaded) #welcome .welcomeActions button{width:100%;min-width:0}}
+
